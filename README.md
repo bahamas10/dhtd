@@ -99,6 +99,11 @@ in order to work properly - you can install it with:
 Node version 8 or higher
 
     npm install -g dhtd
+    
+Alternatives
+------------
+
+- https://github.com/larsks/dhtd - uses a socket file for communication - requires the daemon itself run as root
 
 License
 -------
