@@ -43,6 +43,11 @@ config.web.port = config.web.port || 10333;
 
 config.interval = (config.interval || 30) * 1000;
 
+if (isNaN(config.interval) || config.interval < 1) {
+  console.error('interval must be at least 1 second');
+  process.exit(1);
+}
+
 var DHT_DATA = {};
 /**
  * get temperature data from the DHT sensor using the bundled
@@ -101,6 +106,7 @@ function loopgettemps() {
 
 // get an initial temperature reading before starting the daemon... this will crashe
 // the process if the initial reading fails.
+log('starting...');
 gettemps(function(err) {
   if (err)
     throw err;
@@ -110,6 +116,8 @@ gettemps(function(err) {
 
   // start the loop
   loopgettemps();
+
+  log('looping every %d seconds', config.interval);
 });
 
 function started() {
