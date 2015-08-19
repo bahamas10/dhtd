@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>DHT Temperature Sensor</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: helvetica, arial, sans-serif;
+				background-color: #eee;
+				height:100%;
+				width:100%;
+			}
+			h1 {
+				margin: 5px 10px;
+				padding: 5px;
+				font-size: 16pt;
+			}
+			h3 {
+				margin: 6px 0;
+
+			}
+			.container {
+				background-color: #fff;
+				margin: 10px auto;
+				max-width: 800px;
+				min-width: 600px;
+				border: 2px solid #222;
+				border-radius: 5px;
+				padding: 20px;
+			}
+			#thermometer {
+				float: left;
+				margin: 10px;
+			}
+			#content {
+				float: left;
+				margin: 10px;
+				padding: 15px;
+				border: 2px solid #bbb;
+				border-radius: 5px;
+				font-size: 14pt;
+			}
+			#footer {
+				font-size: 9pt;
+				font-weight: bold;
+			}
+		</style>
+		<script>
+			/**
+			 * simple function to make a request and get the text back
+			 *
+			 * ex:
+			 * request('/foobar.txt', function(err, text) {
+			 *   console.log(text);
+			 * });
+			 */
+			 function request(uri, method, data, headers, cb) {
+				 if (typeof method === 'function') {
+					 cb = method;
+					 method = undefined;
+				 }
+
+				 if (typeof data === 'function') {
+					 cb = data;
+					 data = undefined;
+				 }
+
+				 if (typeof headers === 'function') {
+					 cb = headers;
+					 headers = undefined;
+				 }
+
+				 method = method || 'GET';
+				 headers = headers || {};
+
+				 var xhr = new XMLHttpRequest();
+				 xhr.onreadystatechange = function() {
+					 var e;
+
+					 if (xhr.readyState !== 4)
+						 return;
+
+					 if (xhr.status !== 200) {
+						 e = new Error('request failed');
+						 e.xhr = xhr;
+						 cb(e);
+						 return;
+					 }
+
+					 cb(null, xhr.responseText);
+				 };
+
+				 xhr.open(method, uri, true);
+				 Object.keys(headers).forEach(function(header) {
+					 xhr.setRequestHeader(header, headers[header]);
+				 });
+				 xhr.send(data);
+
+				 return xhr;
+			 }
+
+			 var canvas, ctx, humidity, fahrenheit, celsius, lastupdate_span, img;
+			 window.addEventListener('load', init);
+			 function init() {
+				 canvas = document.getElementById('thermometer');
+				 ctx = canvas.getContext('2d');
+				 lastupdate_span = document.getElementById('last-update');
+				 humidity = document.getElementById('humidity');
+				 fahrenheit = document.getElementById('fahrenheit');
+				 celsius = document.getElementById('celsius');
+
+				 img = new Image();
+				 img.src = './thermometer.png';
+				 img.onload = function() {
+					 update();
+				 };
+
+				 // load stats
+				 request('/stats', function(err, txt) {
+					 if (err)
+						 return;
+					 var data = JSON.parse(txt);
+					 var title = document.getElementById('title');
+					 title.textContent = data.hostname + ' ' + title.textContent + ' - v' + data.dhtd_version;
+					 document.title = title.textContent;
+					 var v = document.getElementById('dhtd-version');
+					 v.textContent = 'dhtd v' + data.dhtd_version + ' node ' + data.node_version;;
+				 });
+			 }
+
+			function update() {
+				request('/data.json', function(err, txt) {
+					if (err) {
+						lastupdate_span.textContent = 'FAILED - data stale';
+						fahrenheit.textContent = '0';
+						celsius.textContent = '0';
+						humidity.textContent = '0';
+						thermo(-30);
+					} else {
+						var data = JSON.parse(txt);
+						thermo(data.celsius);
+
+						fahrenheit.textContent = data.fahrenheit.toFixed(1);
+						celsius.textContent = data.celsius.toFixed(1);
+						humidity.textContent = data.humidity.toFixed(1);
+
+						lastupdate_span.textContent = 'Last Updated: ' + new Date();
+					}
+					setTimeout(update, 30 * 1000);
+				});
+			}
+
+			 function thermo(c) {
+				 ctx.clearRect(0, 0, canvas.width, canvas.height);
+				 ctx.rotate(.00001);
+				 ctx.drawImage(img, 0, 0);
+				 ctx.rotate(0);
+				 drawLiquid(ctx, convertTempToScreenCoord(getRatio(c), c));
+			 }
+
+			 /**
+			  * thermometer stuff from https://github.com/rheh/HTML5-canvas-projects
+			  */
+			  function getRatio(iTemp) {
+				  /* The image is not in proportion this the gauge to pixel
+				  * ratio need slight adjustment
+				  */
+
+				  var iRatio;
+
+				  if (iTemp > 0) {
+					  iRatio = 7.1;
+				  } else if (iTemp <= 0) {
+					  iRatio = 6.9;
+				  } else if (iTemp < -20) {
+					  iRatio = 6.77;
+				  }
+
+				  return iRatio;
+			  }
+			  function convertTempToScreenCoord(iRatio, iTemp) {
+				  /* Algorithm to convert the temperature to the correct x screen coord.
+				  * Odd, but works!
+				  */
+				  var iMAX_TEMP = 50,
+				  iSTART_Y_POS = 116;
+
+				  return iSTART_Y_POS + (iRatio * (iMAX_TEMP - iTemp));
+			  }
+			  function drawLiquid(ctx, iTempToYCoord) {
+				  /* Draw red rectangle to represent the fluid in the glass tube
+				  * Coordinates you Y and are fixed!
+				  * TODO: Calculare Y coord base on image X,Y
+				  */
+				  var iX_POS = 84,
+				  iY_POS = 5,
+				  iY_OFFSET = 652,
+				  iWIDTH = 35;
+
+				  ctx.fillStyle = "rgb(200,0,0)";
+
+				  // Draw rectangle from -30 to iTempToYCoord
+				  ctx.fillRect(iX_POS, iTempToYCoord, iY_POS, iY_OFFSET - iTempToYCoord);
+
+				  // Draw rectangle from botton to -30
+				  ctx.fillRect(iX_POS, iY_OFFSET, iY_POS, iWIDTH);
+
+				  ctx.stroke();
+			  }
+
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<h1 id="title">DHT Temperature Sensor</h1>
+
+			<canvas id="thermometer" width="200" height="750"></canvas>
+			<div id="content">
+				<h3>Temperature</h3>
+				<span id="fahrenheit"></span>&deg;F<br />
+				<span id="celsius"></span>&deg;C<br />
+				<h3>Humidity</h3>
+				<span id="humidity"></span>%
+			</div>
+
+			<br style="clear: both;" />
+			<div id="footer">
+				<span id="dhtd-version"></span><br />
+				<span id="last-update"></span>
+			</div>
+		</div>
+	</body>
+</html>

@@ -12,7 +12,10 @@
   "bin": {
     "dhtd": "./dhtd.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "access-log": "^0.3.9",
+    "easyreq": "^0.1.3"
+  },
   "devDependencies": {},
   "optionalDependencies": {},
   "engines": {

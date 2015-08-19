@@ -6,6 +6,9 @@ Daemon to manage reading DHT temperature sensors on an interval
 Summary
 -------
 
+This daemon polls the temperature and humidity data on an interval (30 seconds
+by default), and exposes the information over an HTTP interface.
+
 The DHT sensors for reading temperature data on the Raspberry Pi (Linux)
 require precise timing that the kernel can't often guarantee.  As such,
 the Adafruit Python DHT Library has baked into it a lot of retry and backoff
@@ -14,9 +17,6 @@ logic.
 To minimize the chance of losing the race with multiple instances of the
 DHT sensor gathering scripts running simultaneously, this daemon aims to be
 the single source of truth for the DHT sensor.
-
-This daemon polls the temperature and humidity data on an interval (30 seconds
-by default), and exposes the information over an HTTP interface.
 
 Example
 -------
@@ -34,7 +34,8 @@ Create a simple config
     "pin": 17
   },
   "interval": 30,
-  "sudo": true
+  "sudo": true,
+  "stats": true
 }
 ```
 
@@ -42,6 +43,7 @@ Create a simple config
 - `dht` tells this program what kind of DHT sensor you are polling (11, 22, or 2302) and what gpio pin it is on
 - `interval` is time in seconds to sleep between readings
 - `sudo` whether to call the python script with `sudo`, defaults to true
+- `stats` expose stats (hostname, node version, dhtd version) over `/stats`, defaults to true
 
 And start the program with the config
 
@@ -79,6 +81,14 @@ the logs (stdout), but requests to `/data` and `/data.json` will have the
 last previous successful reading data.  This is why the `reading` property
 exists to see when the last successful reading was.
 
+Index
+-----
+
+`GET /` will result in an index page that shows a thermometer graphic with the current
+reading that updates every 30 seconds.
+
+![screenshot](/screenshots/index.png)
+
 Installation
 ------------
 
@@ -99,7 +109,7 @@ in order to work properly - you can install it with:
 Node version 8 or higher
 
     npm install -g dhtd
-    
+
 Alternatives
 ------------
 

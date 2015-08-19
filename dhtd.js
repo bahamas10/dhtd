@@ -14,8 +14,14 @@
 var execFile = require('child_process').execFile;
 var fs = require('fs');
 var http = require('http');
+var os = require('os');
 var path = require('path');
 var util = require('util');
+
+var accesslog = require('access-log');
+var easyreq = require('easyreq');
+
+var package = require('./package.json');
 
 function log() {
   var s = util.format.apply(util, arguments);
@@ -41,13 +47,15 @@ config.web = config.web || {};
 config.web.host = config.web.host || '127.0.0.1';
 config.web.port = config.web.port || 10333;
 
-config.interval = (config.interval || 30) * 1000;
+config.interval = config.interval || 30;
 
 if (isNaN(config.interval) || config.interval < 1) {
   console.error('interval must be at least 1 second');
   process.exit(1);
 }
 
+var INDEX_HTML = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+var IMAGE_DATA = fs.readFileSync(path.join(__dirname, 'thermometer.png'));
 var DHT_DATA = {};
 /**
  * get temperature data from the DHT sensor using the bundled
@@ -101,7 +109,7 @@ function gettemps(cb) {
 function loopgettemps() {
   setTimeout(function() {
     gettemps(loopgettemps);
-  }, config.interval);
+  }, config.interval * 1000);
 }
 
 // get an initial temperature reading before starting the daemon... this will crashe
@@ -125,14 +133,24 @@ function started() {
 }
 
 function onrequest(req, res) {
-  log('%s %s %s', req.connection.remoteAddress, req.method, req.url);
-  switch (req.url) {
+  easyreq(req, res);
+  accesslog(req, res, ':ip :method :url (:{delta}ms)', log);
+
+  switch (req.urlparsed.normalizedpathname) {
+    case '/': res.html(INDEX_HTML); break;
+    case '/thermometer.png': res.setHeader('Content-Type', 'image/png'); res.end(IMAGE_DATA); break;
     case '/ping': res.end('pong\n'); break;
     case '/data': res.end(DHT_DATA.human); break;
     case '/data.json': res.end(DHT_DATA.json); break;
-    default:
-      res.statusCode = 404;
-      res.end();
-      break;
+    case '/stats':
+      if (config.stats === false)
+        return res.error(403);
+      var o = {
+        dhtd_version: package.version,
+        node_version: process.version,
+        hostname: os.hostname(),
+      };
+      res.json(o);
+    default: res.notfound(); break;
   }
 }
