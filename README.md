@@ -47,7 +47,7 @@ And start the program with the config
 
     $ dhtd config.json
     2015-08-17T19:08:47.496Z calling: sudo /home/dave/dev/dhtd/_dht.py 22 17
-    2015-08-17T19:08:57.428Z success: {"farenheit": 77.71999931335449, "celsius": 25.399999618530273, "humidity": 45.599998474121094}
+    2015-08-17T19:08:57.428Z success: {"fahrenheit": 77.71999931335449, "celsius": 25.399999618530273, "humidity": 45.599998474121094}
     2015-08-17T19:08:57.583Z server started: http://127.0.0.1:10333
     2015-08-17T19:08:58.924Z 127.0.0.1 GET /data
     2015-08-17T19:09:04.294Z 127.0.0.1 GET /data.json
@@ -55,7 +55,7 @@ And start the program with the config
 Human readable data is available at `GET /data`
 
     $ curl -sS localhost:10333/data
-    farenheit: 77.72F
+    fahrenheit: 77.72F
     celsius: 25.40C
     humidity: 45.60%
     reading: 2015-08-17T19:08:57.421Z
@@ -64,7 +64,7 @@ And json data at `GET /data.json`
 
     $ curl -sS localhost:10333/data.json | json
     {
-      "farenheit": 77.71999931335449,
+      "fahrenheit": 77.71999931335449,
       "celsius": 25.399999618530273,
       "humidity": 45.599998474121094,
       "reading": "2015-08-17T19:08:57.421Z"

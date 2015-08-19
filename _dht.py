@@ -52,7 +52,7 @@ h, c = Adafruit_DHT.read_retry(sensor, pin)
 # If this happens try again!
 if h is not None and c is not None:
 	f = c * 9 / 5 + 32
-        print json.dumps({'celsius': c, 'farenheit': f, 'humidity': h});
+        print json.dumps({'celsius': c, 'fahrenheit': f, 'humidity': h});
 else:
 	print >>sys.stderr, 'failed to get reading. try again!'
 	sys.exit(1)

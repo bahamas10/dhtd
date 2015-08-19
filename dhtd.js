@@ -86,7 +86,7 @@ function gettemps(cb) {
     log('success: %s', stdout.trim());
     DHT_DATA.json = JSON.stringify(o);
     DHT_DATA.human = [
-      util.format('farenheit: %sF', o.farenheit.toFixed(2)),
+      util.format('fahrenheit: %sF', o.fahrenheit.toFixed(2)),
       util.format('celsius: %sC', o.celsius.toFixed(2)),
       util.format('humidity: %s%%', o.humidity.toFixed(2)),
       util.format('reading: %s', o.reading)
