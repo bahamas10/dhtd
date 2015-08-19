@@ -1,7 +1,7 @@
 {
   "name": "dhtd",
   "description": "Daemon to manage reading DHT temperature sensors on an interval",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Dave Eddy <dave@daveeddy.com> (http://www.daveeddy.com)",
   "contributors": [],
   "preferGlobal": true,
