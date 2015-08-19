@@ -3,6 +3,8 @@ dhtd
 
 Daemon to manage reading DHT temperature sensors on an interval
 
+![screenshot](/screenshots/index.png)
+
 Summary
 -------
 
@@ -72,6 +74,30 @@ And json data at `GET /data.json`
       "reading": "2015-08-17T19:08:57.421Z"
     }
 
+API
+---
+
+### `GET /`
+
+Returns an index page that shows a thermometer graphic with the current reading that
+updates every 30 seconds.
+
+### `GET /ping`
+
+Returns 200 and "pong\n"
+
+### `GET /data`
+
+Returns the current data in text format
+
+### `GET /data.json`
+
+Same as above but as JSON
+
+### `GET /stats`
+
+JSON stats if `stats` is not set to `false` in the config
+
 Notes
 -----
 
@@ -80,14 +106,6 @@ bringing up the HTTP server.  Afterwards, any failures will be recorded in
 the logs (stdout), but requests to `/data` and `/data.json` will have the
 last previous successful reading data.  This is why the `reading` property
 exists to see when the last successful reading was.
-
-Index
------
-
-`GET /` will result in an index page that shows a thermometer graphic with the current
-reading that updates every 30 seconds.
-
-![screenshot](/screenshots/index.png)
 
 Installation
 ------------
