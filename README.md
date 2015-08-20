@@ -62,7 +62,7 @@ Human readable data is available at `GET /data`
     fahrenheit: 77.72F
     celsius: 25.40C
     humidity: 45.60%
-    reading: 2015-08-17T19:08:57.421Z
+    reading: 1440088176
 
 And json data at `GET /data.json`
 

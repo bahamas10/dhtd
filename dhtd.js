@@ -88,7 +88,7 @@ function gettemps(cb) {
       cb(e);
       return;
     }
-    o.reading = new Date().toISOString();
+    o.reading = new Date();
 
     // succesful reading
     log('success: %s', stdout.trim());
@@ -97,7 +97,7 @@ function gettemps(cb) {
       util.format('fahrenheit: %sF', o.fahrenheit.toFixed(2)),
       util.format('celsius: %sC', o.celsius.toFixed(2)),
       util.format('humidity: %s%%', o.humidity.toFixed(2)),
-      util.format('reading: %s', o.reading)
+      util.format('reading: %s', Math.ronud(o.reading.getTime() / 1000))
     ].join('\n') + '\n';
     cb();
   });
