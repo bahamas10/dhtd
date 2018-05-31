@@ -89,6 +89,7 @@ function gettemps(cb) {
       return;
     }
     o.reading = new Date();
+    o.alive = true;
 
     // succesful reading
     log('success: %s', stdout.trim());
